@@ -30,8 +30,24 @@ final public class Graph {
         return nameToId.get(u);
     }
 
-    List<Integer> BFS(int u, int v) {
-        final int incoming[] = new int[size];
+    private int[] breadthFirstSearchWithLength(int u) {
+        final int[] distance = new int[size];
+        Arrays.fill(distance, -1);
+        Queue<Integer> q = new LinkedList<>();
+        q.add(u);
+        distance[u] = 0;
+        while (!q.isEmpty()) {
+            final int front = q.remove();
+            links[front].stream().filter(e -> distance[e] != -1).forEach(e -> {
+                distance[e] = distance[front] + 1;
+                q.add(e);
+            });
+        }
+        return distance;
+    }
+
+    private int[] breadthFirstSearchWithIncoming(int u) {
+        final int[] incoming = new int[size];
         Arrays.fill(incoming, -1);
         Queue<Integer> q = new LinkedList<>();
         q.add(u);
@@ -43,6 +59,11 @@ final public class Graph {
                 q.add(e);
             });
         }
+        return incoming;
+    }
+
+    List<Integer> shortestPath(int u, int v) {
+        final int[] incoming = breadthFirstSearchWithIncoming(u);
         if (incoming[v] == -1) {
             return Collections.emptyList();
         }
@@ -54,5 +75,13 @@ final public class Graph {
             ret.addFirst(cur);
         }
         return ret;
+    }
+
+    Util.Pair<Integer, Integer> getDiameter() {
+        final int start = (int) (Math.random() * size);
+        int[] distances = breadthFirstSearchWithLength(start);
+        final int longest = Arrays.stream(distances).max().getAsInt();
+        distances = breadthFirstSearchWithLength(longest);
+        return new Util.Pair<>(longest, Arrays.stream(distances).max().getAsInt());
     }
 }
