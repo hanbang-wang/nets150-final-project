@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopyrightManager">
+    <LanguageOptions name="__TEMPLATE__">
+      <option name="block" value="false" />
+    </LanguageOptions>
+  </component>
+  <component name="InspectionProjectProfileManager">
+    <profile version="1.0">
+      <option name="myName" value="Project Default" />
+    </profile>
+    <version value="1.0" />
+  </component>
+  <component name="ProjectDictionaryState">
+    <dictionary name="SuperFashi" />
+  </component>
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/nets150-final.iml" filepath="$PROJECT_DIR$/nets150-final.iml" />
+    </modules>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+  </component>
+  <component name="libraryTable">
+    <library name="commons-compress-1.18">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/commons-compress-1.18.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="jackson-annotations-2.9.8">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/jackson-annotations-2.9.8.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="jackson-core-2.9.8">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/jackson-core-2.9.8.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="jackson-databind-2.9.8">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/jackson-databind-2.9.8.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="junit4">
+      <CLASSES>
+        <root url="file://C:/Java/junit4.10" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="file://C:/Java/junit4.10/javadoc" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="file://C:/Java/junit4.10" />
+      </SOURCES>
+      <jarDirectory url="file://C:/Java/junit4.10" recursive="false" />
+      <jarDirectory url="file://C:/Java/junit4.10" recursive="false" type="SOURCES" />
+    </library>
+  </component>
+</project>
