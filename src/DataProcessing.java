@@ -38,9 +38,9 @@ final class DataProcessing {
         System.err.printf("Acquired %d listings.\n", movieInfos.size());
     }
 
-    Set<String> getAllCast() {
-        Set<String> ret = new HashSet<>();
-        movieInfos.forEach(i -> ret.addAll(i.cast));
+    List<List<String>> getAllCasts() {
+        List<List<String>> ret = new LinkedList<>();
+        movieInfos.forEach(i -> ret.add(Collections.unmodifiableList(i.cast)));
         return ret;
     }
 }
