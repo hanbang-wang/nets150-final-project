@@ -3,7 +3,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,14 +14,16 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 final class DataProcessing {
     static final private String url = "https://oracleofbacon.org/data.txt.bz2";
-    static private URL dataSet;
-    static private ObjectMapper mapper = new ObjectMapper();
+    static final private ObjectMapper mapper = new ObjectMapper();
+    static private URL dataSet = null;
     final private List<MovieInfo> movieInfos = new LinkedList<>();
 
     DataProcessing() {
-        try {
-            dataSet = new URL(url);
-        } catch (MalformedURLException ignored) {
+        if (dataSet == null) {
+            try {
+                dataSet = new URL(url);
+            } catch (MalformedURLException ignored) {
+            }
         }
     }
 

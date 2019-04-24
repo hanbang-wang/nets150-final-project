@@ -9,8 +9,21 @@ final public class Graph {
     Graph(Set<String> nodes) {
         nodes.forEach(n -> nameToId.put(n, size++));
         idToName = new String[size];
-        links = new HashSet[size];
+        links = new Set[size];
+        for (int i = 0; i < size; ++i) {
+            links[i] = new HashSet<>();
+        }
         nameToId.forEach((n, i) -> idToName[i] = n);
+    }
+
+    private void ensureValid(int u) {
+        if (u < 0 || u >= size) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private void ensureValid(int... u) {
+        Arrays.stream(u).forEach(this::ensureValid);
     }
 
     void addEdge(String u, String v) {
@@ -30,6 +43,11 @@ final public class Graph {
         return nameToId.get(u);
     }
 
+    String getName(int u) {
+        ensureValid(u);
+        return idToName[u];
+    }
+
     private int[] breadthFirstSearchWithLength(int u) {
         final int[] distance = new int[size];
         Arrays.fill(distance, -1);
@@ -38,7 +56,7 @@ final public class Graph {
         distance[u] = 0;
         while (!q.isEmpty()) {
             final int front = q.remove();
-            links[front].stream().filter(e -> distance[e] != -1).forEach(e -> {
+            links[front].stream().filter(e -> distance[e] == -1).forEach(e -> {
                 distance[e] = distance[front] + 1;
                 q.add(e);
             });
@@ -54,7 +72,7 @@ final public class Graph {
         incoming[u] = u;
         while (!q.isEmpty()) {
             final int front = q.remove();
-            links[front].stream().filter(e -> incoming[e] != -1).forEach(e -> {
+            links[front].stream().filter(e -> incoming[e] == -1).forEach(e -> {
                 incoming[e] = front;
                 q.add(e);
             });
@@ -63,6 +81,7 @@ final public class Graph {
     }
 
     List<Integer> shortestPath(int u, int v) {
+        ensureValid(u, v);
         final int[] incoming = breadthFirstSearchWithIncoming(u);
         if (incoming[v] == -1) {
             return Collections.emptyList();
@@ -77,11 +96,26 @@ final public class Graph {
         return ret;
     }
 
+    private int getRandomMaximum(int[] l) {
+        int max = 0;
+        List<Integer> ret = new LinkedList<>();
+        for (int i = 0; i < size; ++i) {
+            if (l[i] >= max) {
+                if (l[i] != max) {
+                    ret.clear();
+                    max = l[i];
+                }
+                ret.add(i);
+            }
+        }
+        return ret.get((int) (Math.random() * ret.size()));
+    }
+
     Util.Pair<Integer, Integer> getDiameter() {
         final int start = (int) (Math.random() * size);
         int[] distances = breadthFirstSearchWithLength(start);
-        final int longest = Arrays.stream(distances).max().getAsInt();
-        distances = breadthFirstSearchWithLength(longest);
-        return new Util.Pair<>(longest, Arrays.stream(distances).max().getAsInt());
+        final int oneEnd = getRandomMaximum(distances);
+        distances = breadthFirstSearchWithLength(oneEnd);
+        return new Util.Pair<>(oneEnd, getRandomMaximum(distances));
     }
 }
