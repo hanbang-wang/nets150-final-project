@@ -135,4 +135,37 @@ final public class ActorsNetwork {
     List<Integer> getNeighbors(int u) {
         return links[u];
     }
+
+    double averageDegree() {
+        double totalDeg = 0;
+        for (List<Integer> node : links) {
+            totalDeg += node.size();
+        }
+        return totalDeg / size;
+    }
+
+    double graphStDev() {
+        double average = averageDegree();
+        double diffSquaredSum = 0;
+        for (List<Integer> node : links) {
+            diffSquaredSum += Math.pow(node.size() - average, 2);
+        }
+        return Math.sqrt(diffSquaredSum / size);
+    }
+
+    SortedMap<Double, Integer> actorStDevs() {
+        SortedMap<Double, Integer> stDevs = new TreeMap<>();
+        double averageDegree = averageDegree();
+        double graphStDev = graphStDev();
+
+        for (int id = 0; id < size; id++) {
+            double currStDev = (links[id].size() - averageDegree) / graphStDev;
+            stDevs.put(currStDev, id);
+        }
+        return stDevs;
+    }
+
+    double getActorStDev(int id) {
+        return (links[id].size() - averageDegree()) / graphStDev();
+    }
 }
