@@ -1,0 +1,21 @@
+node {
+    /*size: 3px;*/
+    fill-color: #777;
+    z-index: 1;
+}
+
+node.highlight {
+    z-index: 2;
+    size: 30px;
+    text-background-mode: rounded-box;
+    text-background-color: #FFC300;
+    fill-color: #FFC300;
+    text-color: #581845;
+    text-style: bold;
+    text-size: 20px;
+}
+
+node.lowlight {
+    fill-color: #20639B;
+    size: 20px;
+}

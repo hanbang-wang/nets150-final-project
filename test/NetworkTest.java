@@ -1,16 +1,16 @@
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
 
-public class GraphTest {
-    private static Graph g;
+public class NetworkTest {
+    private static ActorsNetwork g;
 
     @BeforeClass
     public static void init() {
@@ -21,19 +21,19 @@ public class GraphTest {
             e.printStackTrace();
             fail();
         }
-        final List<List<String>> casts = process.getAllCasts();
+        final List<String[]> casts = process.getAllCasts();
         final Set<String> set = new HashSet<>();
-        casts.forEach(set::addAll);
+        casts.forEach(l -> set.addAll(Arrays.asList(l)));
 
-        g = new Graph(set);
+        g = new ActorsNetwork(set);
         casts.forEach(c -> {
-            final int l = c.size();
-            for (int i = 0; i < l; ++i) {
-                for (int j = i + 1; j < l; ++j) {
-                    g.addEdge(c.get(i), c.get(j));
+            for (int i = 0; i < c.length; ++i) {
+                for (int j = i + 1; j < c.length; ++j) {
+                    g.addEdge(c[i], c[j]);
                 }
             }
         });
+        System.out.println(g.getSize());
     }
 
     @Test
