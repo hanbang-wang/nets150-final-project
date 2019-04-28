@@ -24,7 +24,7 @@ final class DataProcessing {
 
     void acquireData() throws IOException {
         System.err.println("Start connecting...");
-        URLConnection urlConnection = dataSet.openConnection(new Proxy(Proxy.Type.HTTP, new Socket("127.0.0.1", 8888).getRemoteSocketAddress()));
+        URLConnection urlConnection = dataSet.openConnection();
         InputStream inputStream = urlConnection.getInputStream();
         BZip2CompressorInputStream stream = new BZip2CompressorInputStream(inputStream);
         try (Scanner scanner = new Scanner(stream)) {
