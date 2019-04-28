@@ -4,6 +4,7 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.geom.Point2;
 import org.graphstream.ui.geom.Point3;
+import org.graphstream.ui.graphicGraph.GraphicElement;
 import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Camera;
 import org.graphstream.ui.view.Viewer;
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 final class GraphVisualizer implements Runnable {
+    private final static int NAME_THRESHOLD = 20;
+    private final static int VISUALIZE_TIME_MS = 100;
     private final JFrame frame = new JFrame("Actor Network Visualizer");
     private final JLabel status = new JLabel();
     private ActorsNetwork g;
@@ -48,23 +51,26 @@ final class GraphVisualizer implements Runnable {
 
     private final Set<Integer> nodesInGraph = new HashSet<>();
 
-    private void addEdge(String s, String e) {
+    private Edge addEdge(String s, String e) {
         if (s.compareTo(e) > 0) {
             final String tmp = s;
             s = e;
             e = tmp;
         }
         final Node node1 = network.addNode(s);
-        node1.setAttribute("ui.label", s);
+        node1.setAttribute("ui.label",
+                s.length() <= NAME_THRESHOLD ? s : s.substring(0, NAME_THRESHOLD));
         Node node2 = network.addNode(e);
-        node2.setAttribute("ui.label", e);
+        node2.setAttribute("ui.label",
+                e.length() <= NAME_THRESHOLD ? e : e.substring(0, NAME_THRESHOLD));
         Edge edge = network.addEdge(s + " - " + e, node1, node2);
         if (edge != null) {
             try {
-                Thread.sleep(100, 0);
+                Thread.sleep(VISUALIZE_TIME_MS);
             } catch (InterruptedException ignored) {
             }
         }
+        return edge;
     }
 
     private void displayNeighbors(String name) {
@@ -90,61 +96,45 @@ final class GraphVisualizer implements Runnable {
         nodesInGraph.addAll(collect);
     }
 
-    private Component getVisualizer() {
-        network = new SingleGraph("ActorNetwork");
-        network.setStrict(false);
-        Viewer viewer = new Viewer(network, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-        viewer.enableAutoLayout();
-        network.setAttribute("ui.stylesheet", "url(ui.css)");
-        network.setAttribute("ui.quality");
-        network.setAttribute("ui.antialias");
-
-        ViewPanel view = viewer.addDefaultView(false);
-        view.addMouseWheelListener(e -> {
-            e.consume();
-            final double factor = Math.pow(1.25, e.getWheelRotation());
-            final Camera cam = view.getCamera();
-            final double zoom = cam.getViewPercent() * factor;
-            if (zoom < 1) {
-                final Point2 pxCenter = cam.transformGuToPx(cam.getViewCenter().x, cam.getViewCenter().y, 0);
-                final Point3 guClicked = cam.transformPxToGu(e.getX(), e.getY());
-                final double newRatioPx2Gu = cam.getMetrics().ratioPx2Gu / factor;
-                final double x = guClicked.x + (pxCenter.x - e.getX()) / newRatioPx2Gu;
-                final double y = guClicked.y - (pxCenter.y - e.getY()) / newRatioPx2Gu;
-                cam.setViewCenter(x, y, 0);
-                cam.setViewPercent(zoom);
-            } else {
-                cam.resetView();
-            }
-        });
-
-        view.setPreferredSize(new Dimension(1280, 800));
-        return view;
-    }
-
     private void findLink(String start, String end) {
+        if (Objects.equals(start, end)) return;
         network.forEach(n -> {
             if (Objects.equals(n.getAttribute("ui.class"), "lowlight")) {
                 n.removeAttribute("ui.class");
             }
         });
+        network.getEachEdge().forEach(e -> {
+            if (Objects.equals(e.getAttribute("ui.class"), "lowlight")) {
+                e.removeAttribute("ui.class");
+                e.removeAttribute("ui.label");
+            }
+        });
         List<Integer> list = g.shortestPath(g.getId(start), g.getId(end));
+        nodesInGraph.addAll(list);
         String last = null;
+        int count = 0;
         for (Integer n : list) {
             String name = g.getName(n);
             if (last == null) {
                 last = name;
                 continue;
             }
-            addEdge(last, name);
+            final Edge edge = addEdge(last, name);
             if (network.getNode(last).getAttribute("ui.class") == null) {
                 network.getNode(last).setAttribute("ui.class", "lowlight");
             }
+            edge.setAttribute("ui.class", "lowlight");
+            edge.setAttribute("ui.label", String.valueOf(++count));
             last = name;
         }
         if (network.getNode(last).getAttribute("ui.class") == null) {
             network.getNode(last).setAttribute("ui.class", "lowlight");
         }
+    }
+
+    private void getDiameter() {
+        Util.Pair<Integer, Integer> diameter = g.getDiameter();
+        findLink(g.getName(diameter.first), g.getName(diameter.second));
     }
 
     private void disableAll() {
@@ -181,6 +171,8 @@ final class GraphVisualizer implements Runnable {
             }
         });
 
+        toolbar.add(Box.createHorizontalStrut(10));
+
         final JTextField startAct = new JTextField(10);
         final JTextField endAct = new JTextField(10);
         final JLabel toLabel = new JLabel("to");
@@ -210,7 +202,102 @@ final class GraphVisualizer implements Runnable {
             }
         });
 
+        toolbar.add(Box.createHorizontalStrut(10));
+
+        final JButton diameterButton = new JButton("Get diameter");
+        comps.add(diameterButton);
+        toolbar.add(diameterButton);
+
+        diameterButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                CallbackRunnable runnable = new CallbackRunnable(() -> getDiameter());
+                runnable.callback = () -> enableAll();
+                disableAll();
+                runnable.start();
+            }
+        });
+
+        final JButton clearButton = new JButton("Clear graph");
+        comps.add(clearButton);
+        toolbar.add(clearButton);
+
+        clearButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Iterator<Node> nodeIterator = network.getNodeIterator();
+                while (nodeIterator.hasNext()) {
+                    nodeIterator.next();
+                    nodeIterator.remove();
+                }
+                nodesInGraph.clear();
+            }
+        });
+
         return toolbar;
+    }
+
+    private Component getVisualizer() {
+        network = new SingleGraph("ActorNetwork");
+        network.setStrict(false);
+        Viewer viewer = new Viewer(network, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
+        viewer.enableAutoLayout();
+        network.setAttribute("ui.stylesheet", "url(ui.css)");
+        network.setAttribute("ui.quality");
+        network.setAttribute("ui.antialias");
+
+        ViewPanel view = viewer.addDefaultView(false);
+        view.addMouseWheelListener(e -> {
+            e.consume();
+            final double factor = Math.pow(1.25, e.getWheelRotation());
+            final Camera cam = view.getCamera();
+            final double zoom = cam.getViewPercent() * factor;
+            if (zoom < 1) {
+                final Point2 pxCenter = cam.transformGuToPx(cam.getViewCenter().x, cam.getViewCenter().y, 0);
+                final Point3 guClicked = cam.transformPxToGu(e.getX(), e.getY());
+                final double newRatioPx2Gu = cam.getMetrics().ratioPx2Gu / factor;
+                final double x = guClicked.x + (pxCenter.x - e.getX()) / newRatioPx2Gu;
+                final double y = guClicked.y - (pxCenter.y - e.getY()) / newRatioPx2Gu;
+                cam.setViewCenter(x, y, 0);
+                cam.setViewPercent(zoom);
+            } else {
+                cam.resetView();
+            }
+        });
+
+        view.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    GraphicElement element = view.findNodeOrSpriteAt(e.getX(), e.getY());
+                    if (element instanceof Node) {
+                        final JPopupMenu popup = new JPopupMenu();
+                        JMenuItem deleteItem = new JMenuItem("Delete Node");
+                        deleteItem.addActionListener(el -> {
+                            final String id = element.getId();
+                            final Node clickedNode = network.getNode(id);
+                            List<Node> neighborNodes = new LinkedList<>();
+                            Iterator<Node> neighborNodeIter = clickedNode.getNeighborNodeIterator();
+                            while (neighborNodeIter.hasNext()) {
+                                neighborNodes.add(neighborNodeIter.next());
+                            }
+                            nodesInGraph.remove(g.getId(id));
+                            network.removeNode(clickedNode);
+                            neighborNodes.stream()
+                                    .filter(n -> n.getDegree() == 0).forEach(n -> {
+                                nodesInGraph.remove(g.getId(n.getId()));
+                                network.removeNode(n);
+                            });
+                        });
+                        popup.add(deleteItem);
+                        popup.show(e.getComponent(), e.getX(), e.getY());
+                    }
+                }
+            }
+        });
+
+        view.setPreferredSize(new Dimension(1280, 800));
+        return view;
     }
 
     @Override
@@ -221,7 +308,7 @@ final class GraphVisualizer implements Runnable {
         frame.add(status, BorderLayout.SOUTH);
 
         status.setHorizontalAlignment(SwingConstants.CENTER);
-        status.setFont(new Font(status.getFont().getName(), Font.PLAIN, 50));
+        status.setFont(new Font(status.getFont().getName(), Font.PLAIN, 40));
 
         frame.setLocation(200, 10);
         frame.pack();
