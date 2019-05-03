@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +24,6 @@ final class DataProcessing {
     }
 
     void acquireData() throws IOException {
-        System.err.println("Start connecting...");
         URLConnection urlConnection = dataSet.openConnection();
         InputStream inputStream = urlConnection.getInputStream();
         BZip2CompressorInputStream stream = new BZip2CompressorInputStream(inputStream);
@@ -35,16 +35,9 @@ final class DataProcessing {
         } catch (JsonMappingException e) {
             throw new RuntimeException(e);
         }
-        System.err.printf("Acquired %d listings.\n", movieInfos.size());
     }
 
     List<String[]> getAllCasts() {
-        List<String[]> ret = new LinkedList<>();
-        movieInfos.forEach(i -> ret.add(i.cast));
-        return ret;
-    }
-
-    List<Util.MovieInfo> getMovieInfos() {
-        return movieInfos;
+        return movieInfos.stream().map(i -> i.cast).collect(Collectors.toList());
     }
 }

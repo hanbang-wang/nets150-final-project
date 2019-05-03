@@ -1,4 +1,4 @@
-public class CallbackRunnable extends Thread {
+class CallbackRunnable extends Thread {
     Runnable callback;
 
     CallbackRunnable(Runnable a) {

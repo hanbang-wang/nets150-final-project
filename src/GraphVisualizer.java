@@ -11,6 +11,8 @@ import org.graphstream.ui.view.Viewer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.io.IOException;
 import java.util.*;
@@ -24,7 +26,7 @@ final class GraphVisualizer implements Runnable {
     private final JLabel status = new JLabel();
     private ActorsNetwork g;
     private Graph network;
-    private List<Component> comps = new LinkedList<>();
+    private final List<Component> comps = new LinkedList<>();
 
     private void init() {
         DataProcessing process = new DataProcessing();
@@ -46,7 +48,7 @@ final class GraphVisualizer implements Runnable {
                 }
             }
         }
-        status.setText("Network built!");
+        status.setText("Data loaded!");
     }
 
     private final Set<Integer> nodesInGraph = new HashSet<>();
@@ -82,7 +84,7 @@ final class GraphVisualizer implements Runnable {
         node.setAttribute("ui.label", name);
         node.setAttribute("layout.weight", 1. / 3);
 
-        final int id = g.getId(name);
+        final int id = g.getID(name);
         List<Integer> collect = g.getNeighbors(id)
                 .stream()
                 .sorted(Comparator.comparingInt(o -> g.getDegree(o)))
@@ -109,7 +111,7 @@ final class GraphVisualizer implements Runnable {
                 e.removeAttribute("ui.label");
             }
         });
-        List<Integer> list = g.shortestPath(g.getId(start), g.getId(end));
+        List<Integer> list = g.shortestPath(g.getID(start), g.getID(end));
         nodesInGraph.addAll(list);
         String last = null;
         int count = 0;
@@ -218,7 +220,7 @@ final class GraphVisualizer implements Runnable {
             }
         });
 
-        final JButton clearButton = new JButton("Clear graph");
+        final JButton clearButton = new JButton("Clear visualizer");
         comps.add(clearButton);
         toolbar.add(clearButton);
 
@@ -273,6 +275,7 @@ final class GraphVisualizer implements Runnable {
                     if (element instanceof Node) {
                         final JPopupMenu popup = new JPopupMenu();
                         JMenuItem deleteItem = new JMenuItem("Delete Node");
+                        JMenuItem copyText = new JMenuItem("Copy Name");
                         deleteItem.addActionListener(el -> {
                             final String id = element.getId();
                             final Node clickedNode = network.getNode(id);
@@ -281,14 +284,20 @@ final class GraphVisualizer implements Runnable {
                             while (neighborNodeIter.hasNext()) {
                                 neighborNodes.add(neighborNodeIter.next());
                             }
-                            nodesInGraph.remove(g.getId(id));
+                            nodesInGraph.remove(g.getID(id));
                             network.removeNode(clickedNode);
                             neighborNodes.stream()
                                     .filter(n -> n.getDegree() == 0).forEach(n -> {
-                                nodesInGraph.remove(g.getId(n.getId()));
+                                nodesInGraph.remove(g.getID(n.getId()));
                                 network.removeNode(n);
                             });
                         });
+                        copyText.addActionListener(el -> {
+                            final String id = element.getId();
+                            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                            clipboard.setContents(new StringSelection(id), null);
+                        });
+                        popup.add(copyText);
                         popup.add(deleteItem);
                         popup.show(e.getComponent(), e.getX(), e.getY());
                     }

@@ -1,23 +1,23 @@
 import java.util.*;
 
-final public class ActorsNetwork {
+final class ActorsNetwork {
     private int size = 0;
-    private final Map<String, Integer> nameToId = new HashMap<>();
+    private final Map<String, Integer> nameToID = new HashMap<>();
     private final String[] idToName;
     private final List<Integer>[] links;
 
     ActorsNetwork(Set<String> nodes) {
-        nodes.forEach(n -> nameToId.put(n, size++));
+        nodes.forEach(n -> nameToID.put(n, size++));
         idToName = new String[size];
         links = new List[size];
         for (int i = 0; i < size; ++i) {
             links[i] = new LinkedList<>();
         }
-        nameToId.forEach((n, i) -> idToName[i] = n);
+        nameToID.forEach((n, i) -> idToName[i] = n);
     }
 
     boolean exists(String k) {
-        return nameToId.containsKey(k);
+        return nameToID.containsKey(k);
     }
 
     private void ensureValid(int u) {
@@ -34,17 +34,17 @@ final public class ActorsNetwork {
         if (!exists(u) || !exists(v)) {
             throw new NoSuchElementException();
         }
-        final int uId = nameToId.get(u);
-        final int vId = nameToId.get(v);
+        final int uId = nameToID.get(u);
+        final int vId = nameToID.get(v);
         links[uId].add(vId);
         links[vId].add(uId);
     }
 
-    int getId(String u) {
+    int getID(String u) {
         if (!exists(u)) {
             throw new NoSuchElementException();
         }
-        return nameToId.get(u);
+        return nameToID.get(u);
     }
 
     String getName(int u) {

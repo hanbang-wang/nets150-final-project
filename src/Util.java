@@ -1,7 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 final class Util {
     static final class Pair<T1, T2> {
         final T1 first;
