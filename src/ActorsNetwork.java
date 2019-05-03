@@ -165,7 +165,45 @@ final public class ActorsNetwork {
         return stDevs;
     }
 
+    /**
+     * Using the given interval, finds the number of actors with degrees in
+     * certain ranges. An interval of 10 will have buckets 0-9, 10-19, etc.
+     * The lower end of the interval is used as the map key.
+     * Also creates buckets with value 0 within the range of possible degrees,
+     * which helps when creating histograms.
+     * @param interval The degree range in each bucket
+     * @return A map with min degree as key and number of actors as values
+     */
+    SortedMap<Integer, Integer> degBuckets(int interval) {
+        SortedMap<Integer, Integer> degs = new TreeMap<>();
+        int maxBucket = 0;
+        for (List<Integer> actor : links) {
+            int degree = actor.size();
+            int bucket = degree / interval * interval;
+
+            if (bucket > maxBucket) {
+                maxBucket = bucket;
+            }
+            degs.put(bucket, degs.getOrDefault(bucket, 0) + 1);
+        }
+        for (int bucket = 0; bucket < maxBucket; bucket += interval) {
+            if (!degs.containsKey(bucket)) {
+                degs.put(bucket, 0);
+            }
+        }
+
+        return degs;
+    }
+
     double getActorStDev(int id) {
         return (links[id].size() - averageDegree()) / graphStDev();
+    }
+
+    SortedMap<Integer, String> sortedDegToName() {
+        SortedMap<Integer, String> actors = new TreeMap<>();
+        for (int i = 0; i < size; i++) {
+            actors.put(links[i].size(), idToName[i]);
+        }
+        return actors;
     }
 }
