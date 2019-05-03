@@ -33,12 +33,12 @@ public class NetworkTest {
         System.out.println(g.getSize());
     }
 
-//    @Test
-//    public void testGraphDiameter() {
-//        Util.Pair<Integer, Integer> diameter = g.getDiameter();
-//        System.out.println(g.getName(diameter.first));
-//        System.out.println(g.getName(diameter.second));
-//    }
+    @Test
+    public void testGraphDiameter() {
+        Util.Pair<Integer, Integer> diameter = g.getDiameter();
+        System.out.println(g.getName(diameter.first));
+        System.out.println(g.getName(diameter.second));
+    }
 
     @Test
     public void statAnalysis() {
@@ -76,5 +76,44 @@ public class NetworkTest {
             }
             prev = actor.getKey();
         }
+    }
+
+    @Test
+    public void printDegBuckets() {
+        SortedMap<Integer, Integer> degs = g.degBuckets(1);
+//        System.out.println(degs);
+        System.out.println(degs.values());
+    }
+
+    @Test
+    public void printDegs() {
+        System.out.println(g.sortedDegToName());
+    }
+
+    @Test
+    public void highestPaid() {
+        Set<String> rich = new HashSet<>();
+        rich.add("Samuel L. Jackson");
+        rich.add("Harrison Ford");
+        rich.add("Robert Downey, Jr.");
+        rich.add("Tom Hanks");
+        rich.add("Morgan Freeman");
+        rich.add("Scarlett Johansson");
+        rich.add("Andy Serkis");
+        rich.add("Anthony Daniels");
+        rich.add("Tom Cruise");
+        rich.add("Eddie Murphy");
+        rich.add("Stanley Tucci");
+        rich.add("Idris Elba");
+        rich.add("Johnny Depp");
+        rich.add("Ian McKellen");
+        rich.add("Bradley Cooper");
+
+        SortedMap<Integer, String> richDegs = new TreeMap<>();
+        for (String richPerson : rich) {
+            System.out.println(richPerson);
+            richDegs.put(g.getDegree(g.getId(richPerson)), richPerson);
+        }
+        System.out.println(richDegs);
     }
 }
