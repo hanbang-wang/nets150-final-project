@@ -1,7 +1,8 @@
 node {
     /*size: 3px;*/
     fill-color: #777;
-    z-index: 1;
+    z-index: 2;
+    text-size: 12px;
 }
 
 node.highlight {
@@ -18,4 +19,12 @@ node.highlight {
 node.lowlight {
     fill-color: #20639B;
     size: 20px;
+}
+
+edge.lowlight {
+    fill-color: #20639B;
+    size: 5px;
+    text-style: bold;
+    text-size: 20px;
+    text-color: red;
 }
