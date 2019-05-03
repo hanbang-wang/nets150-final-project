@@ -51,7 +51,7 @@ public class NetworkTest {
         toLookup.add("Terry Crews");
         toLookup.add("Ermina Zaenah");
         for (String actor : toLookup) {
-            System.out.println(actor + " is " + g.getActorStDev(g.getId(actor)) +
+            System.out.println(actor + " is " + g.getActorStDev(g.getID(actor)) +
                     " deviations from mean");
         }
     }
@@ -112,7 +112,7 @@ public class NetworkTest {
         SortedMap<Integer, String> richDegs = new TreeMap<>();
         for (String richPerson : rich) {
             System.out.println(richPerson);
-            richDegs.put(g.getDegree(g.getId(richPerson)), richPerson);
+            richDegs.put(g.getDegree(g.getID(richPerson)), richPerson);
         }
         System.out.println(richDegs);
     }
